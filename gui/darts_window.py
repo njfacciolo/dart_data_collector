@@ -2,6 +2,7 @@ import tkinter as tk
 from tkinter import ttk
 from gui.dartboard_frame import Dartboard_Frame
 from gui.cricket_frame import Cricket_Frame
+from gui.cricket_ordered_frame import Cricket_Ordered_Frame
 
 class Darts_Window(tk.Tk):
     def __init__(self):
@@ -22,7 +23,7 @@ class Darts_Window(tk.Tk):
         cricket_frame = Cricket_Frame(self.tabbed_frame_games, self)
         self.tabbed_frame_games.add(cricket_frame, text='Cricket')
 
-        data_frame = tk.Frame(master=self.tabbed_frame_games, width=100, height=100)
+        data_frame = Cricket_Ordered_Frame(master=self.tabbed_frame_games, controller=self)
         self.tabbed_frame_games.add(data_frame, text='Data')
         self.tabbed_frame_games.select(cricket_frame)
         self.tabbed_frame_games.enable_traversal()
