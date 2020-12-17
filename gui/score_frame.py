@@ -4,7 +4,7 @@ from tkinter import *
 import cv2
 from PIL import Image, ImageTk
 
-images_dir = os.getcwd() + '//images//'
+images_dir = os.getcwd() + '//gui//images//'
 row_score_size = (60,60)
 
 class Score_Frame(tk.Frame):
@@ -42,17 +42,13 @@ class Score_Frame(tk.Frame):
             # cv2.destroyAllWindows()
 
     def _build_frame(self):
-
-        x_offset = row_score_size[1]/2
-        y_offset = row_score_size[0]/2
-
-        self.p1_image = self._create_image(Score_Frame.score_images['2'])
-        self.p2_image = self._create_image(Score_Frame.score_images['3_2'])
+        self.p1_image = self._create_image(Score_Frame.score_images['0'])
+        self.p2_image = self._create_image(Score_Frame.score_images['0'])
 
         self.p1 = tk.Label(self, compound=CENTER, image=self.p1_image, background='white')
         self.p1.pack(side='left')
 
-        score_indicator = tk.Label(self, text=' {} '.format(self.point_value), font = 'helvetica 28', bg='white')
+        score_indicator = tk.Label(self, text=' {} '.format(self.point_value), font = 'helvetica 24', bg='white')
         score_indicator.pack(side='left')
 
         self.p2 = tk.Label(self, compound=CENTER, image=self.p2_image, background='white')
@@ -65,7 +61,7 @@ class Score_Frame(tk.Frame):
     def set_score(self, player, score):
         assert score in Score_Frame.score_images
 
-        if player == 1:
+        if player == 0:
             self.p1_image = self._create_image(Score_Frame.score_images[score])
             self.p1.config(image=self.p1_image)
         else:

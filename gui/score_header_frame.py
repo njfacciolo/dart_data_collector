@@ -39,27 +39,21 @@ class Score_Header_Frame(tk.Frame):
         bot = tk.Frame(self, bg='white')
         bot.pack()
 
-        self.score1_var.set('100')
-        self.score2_var.set('5')
-
         self.score1 = tk.Label(bot, bg='white', justify=CENTER, textvariable=self.score1_var, width=w-3)
         self.score1.pack(side='left')
         self.score2 = tk.Label(bot, bg='white', justify=CENTER, textvariable=self.score2_var, width=w-3)
         self.score2.pack(side='left')
 
     def set_score(self, player, score):
-        if player == 1:
-            self.score1_var = str(score)
+        if player == 0:
+            self.score1_var.set(str(score))
         else:
-            self.score2_var = str(score)
+            self.score2_var.set(str(score))
 
     def get_player_names(self):
         return self.ent1.get(), self.ent2.get()
 
-
-
-
-
+# debugging
 if __name__ == "__main__":
     window = tk.Tk()
     frame = Score_Header_Frame(window)

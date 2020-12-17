@@ -1,44 +1,22 @@
 import sys
 import os
+import time
 
-DATA_BASE = os.getcwd() + "//data//"
 
 
 
 class Throw:
-    data_folder = ""
-    data_file = ""
-
-    @staticmethod
-    def create_data_file(file_name, game_type):
-        if game_type == 'cricket':
-            Throw.data_folder = DATA_BASE + 'cricket_games'
-        else:
-            Throw.data_folder = DATA_BASE + 'data_points'
-
-        Throw.data_file = file_name + '.csv'
-
-        Throw.write_data("Time,Thrower,Sector,Multiplier,Drinks,RawPoint")
-
-    @staticmethod
-    def write_data(line):
-        with open(Throw.data_folder + Throw.data_file) as data:
-            data.write(line + "\n")
-
     def __init__(self):
-        self.time = 0
+        self.time = time.time()
         self.thrower = ''
         self.location = (0,0)
         self.point_value = 0
         self.multiplier = 0
         self.number_of_drinks = 0
 
-    def store_throw(self):
+    def get_data_string(self):
         csv = '{},{},{},{},{},{}'.format(self.time, self.thrower, self.point_value, self.multiplier, self.number_of_drinks, self.location)
-        Throw.write_data(csv)
-
-    def set_time(self, time):
-        self.time = time
+        return csv
 
     def set_thrower(self, thrower):
         self.thrower = thrower
