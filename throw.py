@@ -15,7 +15,7 @@ class Throw:
         self.number_of_drinks = 0
 
     def get_data_string(self):
-        csv = '{},{},{},{},{},{}'.format(self.time, self.thrower, self.point_value, self.multiplier, self.number_of_drinks, self.location)
+        csv = '{},{},{},{},{},{},{}'.format(self.time, self.thrower, self.point_value, self.multiplier, self.number_of_drinks, self.location[0], self.location[1])
         return csv
 
     def set_thrower(self, thrower):
