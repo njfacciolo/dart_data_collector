@@ -13,9 +13,9 @@ images_dir = os.getcwd() + '//gui//images//'
 board_dims = (900, 900)
 
 #full image measurements
-center = (749,750)
+center = (750,750)
 diameters = (47,112,640,707,1055,1124)
-angle_offset = 0.25
+angle_offset = 0
 
 draw_overlay = False
 
@@ -101,10 +101,16 @@ class Dartboard_Frame(tk.Frame):
     def _draw_current_board(self):
         img = self.np_blank_dartboard.copy()
         for throw in self.darts_on_board:
-            x,y = throw.location
+            #Convert back to absulte units
+            x = throw.cartesian_x + self.c[0]
+            y = -1 * (throw.cartesian_y - self.c[1])
+            v = throw.point_value
+            m = throw.multiplier
+
+            print('{},{} {} {}'.format(x,y,v,m))
+
             img = cv2.circle(img, (x,y), 2, (0,0,255), -1)
-            value, mult = self.coords2points((x, y))
-            img = cv2.putText(img, str(value) + ', ' + str(mult), (x+5, y-10), cv2.FONT_HERSHEY_PLAIN, 1, (0,0,255), lineType=cv2.LINE_AA)
+            img = cv2.putText(img, str(v) + ', ' + str(m), (x+5, y-10), cv2.FONT_HERSHEY_PLAIN, 1, (0,0,255), lineType=cv2.LINE_AA)
         self.np_current_board = img
 
     def _build_scoring_table(self):
@@ -127,16 +133,13 @@ class Dartboard_Frame(tk.Frame):
         # print(self.scores)
         # print(self.multipliers)
 
-    def coords2points(self, coordinates):
-        # returns (raw_value, multiplier)
-        x = coordinates[0] - self.c[0]
-        y = -1 * (coordinates[1] - self.c[1])
-
+    def coords2points(self, x, y):
+        # x and y are pixel values with respect to the bullseye = 0,0
+        # returns (raw_point_value, multiplier)
         radius, angle = cart2pol(x, y)
 
         while angle < 0:
             angle += math.pi * 2
-
 
         #check for bullseye
         mult = bisect.bisect_left(self.multipliers, (radius, 0))
@@ -154,6 +157,15 @@ class Dartboard_Frame(tk.Frame):
 
         return self.scores[key][1], multiplier
 
+    def _set_throw_location(self, throw, event):
+        raw_x = event.x
+        raw_y = event.y
+
+        x = raw_x - self.c[0]
+        y = -1 * (raw_y - self.c[1])
+        r,t = cart2pol(x,y)
+        throw.set_location(x,y,r,t)
+
     def _on_click(self, event):
         if len(self.darts_on_board) >= 3:
             self._confirm_board()
@@ -162,9 +174,9 @@ class Dartboard_Frame(tk.Frame):
 
         #Create a new Throw event
         throw = Throw()
-        throw.set_location((event.x, event.y))
-        p,m = self.coords2points((event.x, event.y))
-        throw.set_point(p)
+        self._set_throw_location(throw, event)
+        p,m = self.coords2points(throw.cartesian_x, throw.cartesian_y)
+        throw.set_point_value(p)
         throw.set_multiplier(m)
 
         self.darts_on_board.append(throw)
