@@ -26,21 +26,22 @@ class Cricket(Game_State):
                     open=True
                     break
             if not open:
-                print('The game has ended!')
                 return True
         return False
 
+    def reset_game(self):
+        self._reset_game()
+
 
 class Cricket_Frame(tk.Frame, Data_Writer, Cricket):
-    def __init__(self, master=None, *args, **kwargs):
+    def __init__(self, master=None, controller=None, *args, **kwargs):
         tk.Frame.__init__(self, master, bg='white', *args, **kwargs)
         Cricket.__init__(self, 2)
+        Data_Writer.__init__(self)
 
-        file_name = datetime.now().strftime('%Y-%m-%d %H.%M.%S')
-        self.create_data_file(file_name , 'cricket')
 
         self.current_thrower = 0
-        self.master = master
+        self.dart_controller = controller
         self.header = None
         self.score_frames = {}
         self._build_frame()
@@ -59,6 +60,9 @@ class Cricket_Frame(tk.Frame, Data_Writer, Cricket):
             self.score_frames[s] = f
 
     def new_throw_set(self, throws):
+        if self.data_file == None:
+            self.create_data_file('cricket')
+
         for throw in throws:
             throw.thrower = self.current_thrower
             self.write_data(throw.get_data_string())
@@ -69,10 +73,11 @@ class Cricket_Frame(tk.Frame, Data_Writer, Cricket):
 
             #check if the game has been won
             if self.is_game_over():
-                pass
-
+                return True
 
         self.current_thrower = (self.current_thrower + 1) % 2
+        self._update_thrower()
+        return False
 
     def _update_score_board(self, throw, image):
         key = 'B' if throw.point_value == 25 else str(throw.point_value)
@@ -83,6 +88,22 @@ class Cricket_Frame(tk.Frame, Data_Writer, Cricket):
 
         self.header.set_score(throw.thrower, self.states[throw.thrower].score)
 
+    def _reset_score_board(self):
+        self.reset_game()
+        for player in range(self.player_count):
+            self.header.set_score(player, 0)
+            for score_frame in self.score_frames:
+                self.score_frames[score_frame].set_score(player, '0')
+
+        self.current_thrower = 0
+        self._update_thrower()
+
+        # Reset data tracking
+        self.data_file = None
+        self.data_folder = None
+
+    def _update_thrower(self):
+        self.header.set_thrower(self.current_thrower)
 
 
 

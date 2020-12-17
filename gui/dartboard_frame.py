@@ -21,12 +21,12 @@ draw_overlay = False
 
 class Dartboard_Frame(tk.Frame):
 
-    def __init__(self, master=None, game = None, *args, **kwargs):
+    def __init__(self, master=None, game_controller=None, *args, **kwargs):
         tk.Frame.__init__(self, master, background='white', *args, **kwargs)
 
         # This is the tkinter canvas object
         self.board = None
-        self.game = game
+        self.controller = game_controller
 
         self.scores = []
         self.multipliers = []
@@ -101,13 +101,13 @@ class Dartboard_Frame(tk.Frame):
     def _draw_current_board(self):
         img = self.np_blank_dartboard.copy()
         for throw in self.darts_on_board:
-            #Convert back to absulte units
+            #Convert back to abosulte units
             x = throw.cartesian_x + self.c[0]
             y = -1 * (throw.cartesian_y - self.c[1])
             v = throw.point_value
             m = throw.multiplier
 
-            print('{},{} {} {}'.format(x,y,v,m))
+            # print('{},{} {} {}'.format(x,y,v,m))
 
             img = cv2.circle(img, (x,y), 2, (0,0,255), -1)
             img = cv2.putText(img, str(v) + ', ' + str(m), (x+5, y-10), cv2.FONT_HERSHEY_PLAIN, 1, (0,0,255), lineType=cv2.LINE_AA)
@@ -191,7 +191,7 @@ class Dartboard_Frame(tk.Frame):
         self._update_frame()
 
     def _confirm_board(self):
-        self.game.new_throw_set(self.darts_on_board)
+        self.controller.handle_new_throws(self.darts_on_board)
 
 
 

@@ -1,8 +1,16 @@
 class Game_State:
     def __init__(self, player_count, to_close):
+        self.to_close = to_close
+        self.player_count = player_count
         self.states = []
-        for player in range(player_count):
-            self.states.append(Game_Score(to_close))
+        self._reset_game()
+
+
+    def _reset_game(self):
+        self.states = []
+        for player in range(self.player_count):
+            self.states.append(Game_Score(self.to_close))
+
 
     def update_state(self, throw):
         assert throw.thrower < len(self.states)

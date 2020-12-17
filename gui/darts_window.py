@@ -8,23 +8,53 @@ class Darts_Window(tk.Tk):
         tk.Tk.__init__(self)
 
         self.current_game = None
-
-
+        self.frame_dartboard = None
+        self.tabbed_frame_games = None
+        self.available_games = []
         self._build_window()
 
     def _build_window(self):
         self.title('Darrrrrts')
 
-        game_window = ttk.Notebook(self)
-        game_window.pack(side='left', fill='y')
+        self.tabbed_frame_games = ttk.Notebook(self)
+        self.tabbed_frame_games.pack(side='left', fill='y')
 
-        cricket_frame = Cricket_Frame(game_window)
-        game_window.add(cricket_frame, text='Cricket')
+        cricket_frame = Cricket_Frame(self.tabbed_frame_games, self)
+        self.tabbed_frame_games.add(cricket_frame, text='Cricket')
 
-        data_frame = tk.Frame(master=game_window, width=100, height=100)
-        game_window.add(data_frame, text='Data')
-        game_window.select(cricket_frame)
-        game_window.enable_traversal()
+        data_frame = tk.Frame(master=self.tabbed_frame_games, width=100, height=100)
+        self.tabbed_frame_games.add(data_frame, text='Data')
+        self.tabbed_frame_games.select(cricket_frame)
+        self.tabbed_frame_games.enable_traversal()
 
-        dartboard = Dartboard_Frame(master = self, game=cricket_frame)
-        dartboard.pack()
+        self.available_games.append(cricket_frame)
+        self.available_games.append(data_frame)
+
+        self.frame_dartboard = Dartboard_Frame(master = self, game_controller = self)
+        self.frame_dartboard.pack()
+
+    def handle_new_throws(self, throws):
+        if self.current_game is None:
+            current_index = self.tabbed_frame_games.index('current')
+            self.current_game = self.available_games[current_index]
+
+        game_ended = self.current_game.new_throw_set(throws)
+        if game_ended:
+            self.game_ended()
+
+    def game_ended(self):
+        # print('Darts_Window:: The game has ended!')
+
+        # Generate a summary
+        # Generate a replay?
+
+        # Reset the dartboard
+        self.frame_dartboard._reset_display()
+
+        # Reset the game states
+        self.current_game._reset_score_board()
+
+        # Remove the existing game from focus
+        self.current_game = None
+
+        # generate a new csv

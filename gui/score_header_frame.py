@@ -53,6 +53,14 @@ class Score_Header_Frame(tk.Frame):
     def get_player_names(self):
         return self.ent1.get(), self.ent2.get()
 
+    def set_thrower(self, thrower):
+        if thrower == 0:
+            self.ent1.configure(bg='yellow', fg='black')
+            self.ent2.configure(bg='white', fg='black')
+        else:
+            self.ent1.configure(bg='white', fg='black')
+            self.ent2.configure(bg='yellow', fg='black')
+
 # debugging
 if __name__ == "__main__":
     window = tk.Tk()
