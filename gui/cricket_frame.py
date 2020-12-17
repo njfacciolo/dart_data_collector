@@ -18,6 +18,17 @@ class Cricket(Game_State):
             return self.update_state(throw)
         return '0'
 
+    def is_game_over(self):
+        for state in self.states:
+            open = False
+            for v in self.valid_throws:
+                if not state.is_closed(v):
+                    open=True
+                    break
+            if not open:
+                print('The game has ended!')
+                return True
+        return False
 
 
 class Cricket_Frame(tk.Frame, Data_Writer, Cricket):
@@ -57,7 +68,9 @@ class Cricket_Frame(tk.Frame, Data_Writer, Cricket):
             self._update_score_board(throw, new_val)
 
             #check if the game has been won
-            # self._check_game_over()
+            if self.is_game_over():
+                pass
+
 
         self.current_thrower = (self.current_thrower + 1) % 2
 

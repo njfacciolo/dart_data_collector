@@ -16,7 +16,7 @@ class Game_State:
                 if i == throw.thrower:
                     continue
                 s = self.states[i]
-                if s.is_closed(throw):
+                if s.is_closed(throw.point_value):
                     return self._get_image_id(state, throw.point_value)
 
         state.score += remainder
@@ -63,9 +63,8 @@ class Game_Score:
 
         return remaining_hits * val
 
-    def is_closed(self, throw):
-        v = throw.point_value
-        key = 'b' if v == 25 else str(v)
+    def is_closed(self, value):
+        key = 'b' if value == 25 else str(value)
 
         assert key in self.status
         return sum(self.status[key]) >= 3
