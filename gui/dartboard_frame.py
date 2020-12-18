@@ -107,8 +107,6 @@ class Dartboard_Frame(tk.Frame):
             v = throw.point_value
             m = throw.multiplier
 
-            # print('{},{} {} {}'.format(x,y,v,m))
-
             # Overlay a circle where the dart landed
             img = cv2.circle(img, (x,y), 2, (0,0,255), -1)
 

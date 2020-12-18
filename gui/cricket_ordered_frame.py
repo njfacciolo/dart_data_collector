@@ -27,14 +27,14 @@ class Ordered_Cricket(Game_State):
 
 
     def is_game_over(self):
+        all_closed = True
         for state in self.states:
-            open = False
             for v in self.valid_throws:
                 if not state.is_closed(v):
-                    open=True
+                    all_closed = False
                     break
-            if not open:
-                return True
+        if all_closed:
+            return True
         return False
 
     def reset_game(self):
