@@ -24,8 +24,6 @@ class Ordered_Cricket(Game_State):
             if not score.is_closed(valid_throw):
                 return '0'
 
-
-
     def is_game_over(self):
         all_closed = True
         for state in self.states:
@@ -36,6 +34,12 @@ class Ordered_Cricket(Game_State):
         if all_closed:
             return True
         return False
+
+    def is_thrower_done(self, thrower):
+        for v in self.valid_throws:
+            if not self.states[thrower].is_closed(v):
+                return False
+        return True
 
     def reset_game(self):
         self._reset_game()
@@ -84,6 +88,9 @@ class Cricket_Ordered_Frame(tk.Frame, Data_Writer, Ordered_Cricket):
                 return True
 
         self.current_thrower = (self.current_thrower + 1) % 2
+        if self.is_thrower_done(self.current_thrower):
+            self.current_thrower = (self.current_thrower + 1) % 2
+
         self._update_thrower()
         return False
 
