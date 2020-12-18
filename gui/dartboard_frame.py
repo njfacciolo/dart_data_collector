@@ -100,7 +100,7 @@ class Dartboard_Frame(tk.Frame):
 
     def _draw_current_board(self):
         img = self.np_blank_dartboard.copy()
-        for throw in self.darts_on_board:
+        for i, throw in enumerate(self.darts_on_board):
             #Convert back to abosulte units
             x = throw.cartesian_x + self.c[0]
             y = -1 * (throw.cartesian_y - self.c[1])
@@ -109,8 +109,15 @@ class Dartboard_Frame(tk.Frame):
 
             # print('{},{} {} {}'.format(x,y,v,m))
 
+            # Overlay a circle where the dart landed
             img = cv2.circle(img, (x,y), 2, (0,0,255), -1)
+
+            # Overlay info about the point next to the dart
             img = cv2.putText(img, str(v) + ', ' + str(m), (x+5, y-10), cv2.FONT_HERSHEY_PLAIN, 1, (0,0,255), lineType=cv2.LINE_AA)
+
+            # Print the same info as above in top left
+            img = cv2.putText(img, str(v) + ', ' + str(m), (20, 30 + (i * 20)), cv2.FONT_HERSHEY_PLAIN, 1, (0,0,0), lineType=cv2.LINE_AA)
+
         self.np_current_board = img
 
     def _build_scoring_table(self):
