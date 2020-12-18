@@ -37,9 +37,6 @@ class Score_Frame(tk.Frame):
         #Resize the images to a more apropriate scale
         for name in Score_Frame.score_images:
             Score_Frame.score_images[name] = cv2.resize(Score_Frame.score_images[name], row_score_size, interpolation=cv2.INTER_AREA)
-            # cv2.imshow('name', Score_Frame.score_images[name])
-            # cv2.waitKey(0)
-            # cv2.destroyAllWindows()
 
     def _build_frame(self):
         self.p1_image = self._create_image(Score_Frame.score_images['0'])

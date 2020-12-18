@@ -3,6 +3,7 @@ from tkinter import ttk
 from gui.dartboard_frame import Dartboard_Frame
 from gui.cricket_frame import Cricket_Frame
 from gui.cricket_ordered_frame import Cricket_Ordered_Frame
+from gui.drinks_frame import Drinks_Frame
 
 class Darts_Window(tk.Tk):
     def __init__(self):
@@ -17,8 +18,14 @@ class Darts_Window(tk.Tk):
     def _build_window(self):
         self.title('Darrrrrts')
 
-        self.tabbed_frame_games = ttk.Notebook(self)
-        self.tabbed_frame_games.pack(side='left', fill='y')
+        self.left_panel = tk.Frame(self, bg='white')
+        self.left_panel.pack(side='left', fill='y')
+
+        self.tabbed_frame_games = ttk.Notebook(self.left_panel)
+        self.tabbed_frame_games.pack(fill='y')
+
+        self.drink_frame = Drinks_Frame(self.left_panel)
+        self.drink_frame.pack()
 
         cricket_frame = Cricket_Frame(self.tabbed_frame_games, self)
         self.tabbed_frame_games.add(cricket_frame, text='Cricket')
@@ -31,8 +38,12 @@ class Darts_Window(tk.Tk):
         self.available_games.append(cricket_frame)
         self.available_games.append(data_frame)
 
+
+
         self.frame_dartboard = Dartboard_Frame(master = self, game_controller = self)
         self.frame_dartboard.pack()
+
+
 
     def handle_new_throws(self, throws):
         if self.current_game is None:
@@ -59,3 +70,7 @@ class Darts_Window(tk.Tk):
         self.current_game = None
 
         # generate a new csv
+
+
+
+
