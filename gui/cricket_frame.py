@@ -65,6 +65,7 @@ class Cricket_Frame(tk.Frame, Data_Writer, Cricket):
 
         for throw in throws:
             throw.thrower = self.current_thrower
+            throw.thrower_name = self.header.ent1.get() if self.current_thrower == 0 else self.header.ent2.get()
             self.write_data(throw.get_data_string())
             new_val = self.add_throw(throw)
 

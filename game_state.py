@@ -5,6 +5,9 @@ class Game_State:
         self.states = []
         self._reset_game()
 
+    def set_player_names(self, names):
+        for name, state in zip(names, self.states):
+            state.player_name = name
 
     def _reset_game(self):
         self.states = []
@@ -51,6 +54,7 @@ class Game_State:
 
 class Game_Score:
     def __init__(self, to_close):
+        self.player_name = ""
         self.to_close = to_close
         self.score = 0
         self.status = {}
