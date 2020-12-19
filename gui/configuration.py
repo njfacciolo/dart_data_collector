@@ -16,6 +16,9 @@ DIAMETERS_MM = (12.7, 31.8, 194, 214, 320, 340)
 # Dimensions of the board to put on the monitor. This is critical when re-using throw data
 DISPLAY_BOARD_SIZE = (900,900)
 
+# Pixels to MM once the image has been scaled
+PIXEL2MM = DIAMETERS_MM[-1] / ((DISPLAY_BOARD_SIZE[0] / DARTBOARD_IMAGE_DIMENSIONS[0]) * (DIAMETERS[-1]))
+
 # Draw the overlay onto the existing image
 DRAW_OVERLAY = False
 

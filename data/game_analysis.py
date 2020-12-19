@@ -39,7 +39,6 @@ class Ordered_Cricket_Analysis():
         self.miss_distance[0]=[]
         self.correction_to_hit[0]=[]
 
-
     def analyze(self):
         if self.throws is None:
             return
@@ -56,6 +55,8 @@ class Ordered_Cricket_Analysis():
             self.correction_to_hit[v].append(miss_delta)
 
             self.miss_distance[v].append(Point(0, 0).distance(Point(miss_delta)))
+
+        self.average_num_drinks = np.average(drinks)
 
         # Aggregate all data for convenience
         for key in self.hits:
@@ -76,7 +77,7 @@ def analyze_game_ordered_cricket(throw_dic, drink_dic):
     # create a dummy game for tracking scores
     dummy_game = Ordered_Cricket(player_count=2)
 
-    analysis_list = []
+    game_details = []
 
     for i, thrower in enumerate(throw_dic):
         if thrower not in drink_dic:
@@ -90,12 +91,32 @@ def analyze_game_ordered_cricket(throw_dic, drink_dic):
             dummy_game.add_throw(throw)
 
         # Create a new analysis with the data
-        analysis_list.append( Ordered_Cricket_Analysis(throw_dic[thrower]))
-    for oca in analysis_list:
-        oca.analyze()
+        game_details.append( Ordered_Cricket_Analysis(throw_dic[thrower]))
+
+    for gd in game_details:
+        gd.analyze()
 
     # visualize info?
+    gd1, gd2 = game_details[0], game_details[1]
+    print('Stat: {}, {}'.format(gd1.player_name, gd2.player_name))
+    print('Average Drinks: {:.2f}, {:.2f}'.format(gd1.average_num_drinks, gd2.average_num_drinks))
+    print('Num Throws: {}, {}'.format(gd1.num_throws, gd2.num_throws))
+    print('Game Average Hit Percent: {:.2f}%, {:.2f}%'.format(np.average(gd1.hits[0])*100, np.average(gd2.hits[0])*100))
 
+    valid_throws = [20,19,18,17,16,15,25]
+    for score in valid_throws:
+        print('{} Hit Percent: {:.2f}%, {:.2f}%'.format(score, np.average(gd1.hits[score]) * 100,
+                                                                  np.average(gd2.hits[score]) * 100))
+
+    px2mm = CONFIG.PIXEL2MM
+
+    print('\n')
+    print('Game Average Miss Distance: {:.1f}mm, {:.1f}mm'.format(np.average(gd1.miss_distance[0]) * px2mm, np.average(gd2.miss_distance[0])*px2mm))
+    for score in valid_throws:
+        print('{} Average Miss Distance: {:.1f}mm, {:.1f}mm'.format(score, np.average(gd1.miss_distance[score]) * px2mm,
+                                                                  np.average(gd2.miss_distance[score]) * px2mm))
+
+    return
 
 def calculate_drinks_at_time(time, drink_data):
     if time is None or drink_data is None or drink_data is []:
