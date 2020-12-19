@@ -3,6 +3,8 @@ from datetime import datetime, timedelta, timezone
 import os
 from collections import defaultdict
 from models.drink import Drink
+from gui.configuration import METABOLIC_RATE, ABSORPTION_RATE
+import random
 
 
 def load_daily_drinks(file, drinkers = None):
@@ -37,6 +39,46 @@ def load_daily_drinks(file, drinkers = None):
 
     return ret
 
+def calculate_bac_curve(drinks):
+    bac_curve = []
+    if drinks is None or len(drinks) < 1:
+        return []
+
+    current_backlog = 0
+
+    time = drinks[0].time_of_drink
+
+
+    #Start sober
+    t1 = time - timedelta(minutes=1)
+    bac_curve.append((t1, 0.0))
+
+    step_minutes = 3
+    removed_per_step = METABOLIC_RATE * (step_minutes/60)
+    added_per_step = (1/ABSORPTION_RATE) * (step_minutes/60)
+
+    drank_index = 0
+    while time < drinks[-1].time_of_drink:
+        num_drinks = bac_curve[-1][1]
+
+        # add to backlog to metabolize
+        while drinks[drank_index].time_of_drink < time:
+            current_backlog += drinks[drank_index].get_alcohol_units()
+            drank_index += 1
+
+        # Absorb alcohol
+        change = min(added_per_step, current_backlog)
+        num_drinks += change
+        current_backlog -= change
+
+        # Metabolize alcohol
+        num_drinks = max(0, num_drinks - removed_per_step)
+        bac_curve.append((time, num_drinks))
+
+        time += timedelta(minutes=step_minutes)
+        print(num_drinks)
+
+    return bac_curve
 
 def generate_drink_from_data(data):
     f, success = try_parse_float(data[0].strip())
@@ -63,7 +105,6 @@ def try_parse_float(value):
     except ValueError:
         return None, False
 
-
 def try_parse_string(value):
     try:
         v = str(value).strip(' ').lower()
@@ -77,7 +118,23 @@ def try_parse_string(value):
 if __name__ == "__main__":
     path = os.getcwd() + '//drinks//drink_log.csv'
 
-    drinks = load_daily_drinks(path)
-    print(drinks)
+    # drink_dic = load_daily_drinks(path)
+
+    dummy_drinks = []
+    t = datetime.now().replace(hour=12)
+    for i in range(10):
+
+        d = Drink()
+        d.time_of_drink = t
+        d.drinker='a'
+        d.volume_oz=12.0+ (random.randint(0,1)*4.0)
+        d.abv=5.0 + (random.random()*5.5) - 1.0
+        dummy_drinks.append(d)
+        minute_delta = (random.random() * 20) + 20
+        t = t + timedelta(minutes=minute_delta)
+
+        print('abv: {:.2f}  vol:  {:.2f}'.format(d.abv, d.volume_oz))
+
+    calculate_bac_curve(dummy_drinks)
 
 

@@ -13,3 +13,12 @@ DISPLAY_BOARD_SIZE = (900,900)
 
 # Draw the overlay onto the existing image
 DRAW_OVERLAY = False
+
+
+## Alcohol Ingestion Parameters ##
+
+# Rate at which the body absorbes the alcohol (how long until you feel the drink) in hours
+ABSORPTION_RATE = 0.125
+
+# Rate at which the body processes the drink (1 per hour)
+METABOLIC_RATE = 1.0
