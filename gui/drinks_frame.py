@@ -48,7 +48,7 @@ class Drinks_Frame(tk.Frame, Data_Writer):
 
 
     def _get_header(self):
-        return '{},{},{},{}'.format('Time', 'Thrower', 'abv', 'volume (ml)')
+        return '{},{},{},{}'.format('Time', 'Thrower', 'abv', 'volume (oz)')
 
     def _on_press(self):
         vals = []

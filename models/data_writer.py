@@ -10,7 +10,7 @@ class Data_Writer:
         self.data_file = None
 
     def create_data_file(self, data_folder_name, file_name=None, header=None):
-        self.data_folder = os.getcwd() + "//data//" + data_folder_name + '// '
+        self.data_folder = os.getcwd() + "//data//" + data_folder_name + '//'
 
         if file_name is None:
             file_name = datetime.now().strftime('%Y-%m-%d %H.%M.%S')
