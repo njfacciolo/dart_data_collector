@@ -1,23 +1,20 @@
 import os
 import bisect
 import tkinter as tk
-from tkinter import *
 import cv2
 import numpy as np
 import math
-import time
 from throw import Throw
 from PIL import Image, ImageTk
+from gui import configuration as CONFIG
 
 images_dir = os.getcwd() + '//gui//images//'
-board_dims = (900, 900)
+board_dims = CONFIG.DISPLAY_BOARD_SIZE
 
 #full image measurements
-center = (750,750)
-diameters = (47,112,640,707,1055,1124)
-angle_offset = 0
-
-draw_overlay = False
+center = CONFIG.CENTER
+diameters = CONFIG.DIAMETERS
+draw_overlay = CONFIG.DRAW_OVERLAY
 
 class Dartboard_Frame(tk.Frame):
 
@@ -71,7 +68,7 @@ class Dartboard_Frame(tk.Frame):
     def _update_frame(self):
         self.tk_current_board = self._create_image(self.np_current_board)
         x,y = board_dims
-        self.board.create_image(int(x/2),int(y/2), anchor=CENTER, image=self.tk_current_board)
+        self.board.create_image(int(x/2),int(y/2), anchor=tk.CENTER, image=self.tk_current_board)
 
     def _create_image(self, image):
         return ImageTk.PhotoImage(image=Image.fromarray(image), width=board_dims[0], height=board_dims[1])
@@ -88,11 +85,10 @@ class Dartboard_Frame(tk.Frame):
             out = cv2.circle(out, self.c, int(round(d * self.scale/2)), (255,0,0), 1)
 
         for a in range(9, 360, 18):
-            angle = a + angle_offset
             r = (diameters[len(diameters)-1]/2) *1.1*self.scale
             r = int(round(r))
 
-            x, y = pol2cart(r, deg2rad(angle))
+            x, y = pol2cart(r, deg2rad(a))
             p2 = (round(int(y+self.cy)), round(int(x+self.cx)))
             out = cv2.line(out, self.c, p2, (255,0,0), 1)
 
@@ -126,7 +122,7 @@ class Dartboard_Frame(tk.Frame):
         value_list = [6,13,4,18,1,20,5,12,9,14,11,8,16,7,19,3,17,2,15,10,6]
 
         for a, v in zip(range(9, 370, 18), value_list):
-            angle = deg2rad(a + angle_offset)
+            angle = deg2rad(a )
             self.scores.append((angle,v))
 
 
@@ -157,7 +153,6 @@ class Dartboard_Frame(tk.Frame):
 
         multiplier = self.multipliers[mult][1]
 
-        angle = angle + deg2rad(angle_offset)
         key = bisect.bisect_left(self.scores, (angle, 0))
 
         return self.scores[key][1], multiplier
