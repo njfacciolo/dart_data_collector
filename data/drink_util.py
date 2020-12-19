@@ -5,6 +5,7 @@ from collections import defaultdict
 from models.drink import Drink
 from gui.configuration import METABOLIC_RATE, ABSORPTION_RATE
 import random
+from data.parse_util import try_parse_float
 
 
 def load_daily_drinks(file, drinkers = None):
@@ -27,7 +28,7 @@ def load_daily_drinks(file, drinkers = None):
 
     print('Cut off is: {}'.format(cutoff))
 
-    with open(path, 'r') as drink_data:
+    with open(file, 'r') as drink_data:
         for row in reversed(list(csv.reader(drink_data))):
             drink = generate_drink_from_data(row)
 
@@ -99,21 +100,7 @@ def generate_drink_from_data(data):
 
     return d
 
-def try_parse_float(value):
-    try:
-        return float(value), True
-    except ValueError:
-        return None, False
 
-def try_parse_string(value):
-    try:
-        v = str(value).strip(' ').lower()
-        if v != '':
-            return v, True
-        else:
-            return None, False
-    except ValueError:
-        return None, False
 
 if __name__ == "__main__":
     path = os.getcwd() + '//drinks//drink_log.csv'
