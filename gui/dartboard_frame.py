@@ -4,7 +4,7 @@ import tkinter as tk
 import cv2
 import numpy as np
 import math
-from throw import Throw
+from models.throw import Throw
 from PIL import Image, ImageTk
 from gui import configuration as CONFIG
 

@@ -1,11 +1,9 @@
 import tkinter as tk
-from score_frame import Score_Frame
-from score_header_frame import Score_Header_Frame
-from random import randint
-from throw import Throw
-from data_writer import Data_Writer
-from game_state import Game_State
-from datetime import datetime
+from gui.score_frame import Score_Frame
+from gui.score_header_frame import Score_Header_Frame
+from models.data_writer import Data_Writer
+from models.game_state import Game_State
+
 
 class Ordered_Cricket(Game_State):
     def __init__(self, player_count):
@@ -87,6 +85,9 @@ class Cricket_Ordered_Frame(tk.Frame, Data_Writer, Ordered_Cricket):
             #check if the game has been won
             if self.is_game_over():
                 return True
+
+            if self.is_thrower_done(self.current_thrower):
+                break
 
         self.current_thrower = (self.current_thrower + 1) % 2
         if self.is_thrower_done(self.current_thrower):

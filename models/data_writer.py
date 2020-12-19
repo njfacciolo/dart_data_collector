@@ -1,7 +1,5 @@
-import csv
 import os
-import sys
-from throw import Throw
+from models.throw import Throw
 from datetime import  datetime
 
 
