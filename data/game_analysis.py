@@ -24,22 +24,20 @@ class Ordered_Cricket_Analysis():
         # key 0 is a quick lookup for all throws\
 
         # series of 1s and 0s where 1 is a hit and 0 is a miss
-        self._hits = defaultdict(lambda : [])
+        self.hits = defaultdict(lambda : [])
 
         # distance of miss
-        self._miss_distance = defaultdict(lambda : [])
+        self.miss_distance = defaultdict(lambda : [])
 
         # smallest x y delta to hit
-        self._correction_to_hit = defaultdict(lambda : [])
+        self.correction_to_hit = defaultdict(lambda : [])
 
         self.average_num_drinks = 0
 
         #initialize the full set series
-        self._hits[0]=[]
-        self._miss_distance[0]=[]
-        self._correction_to_hit[0]=[]
-
-
+        self.hits[0]=[]
+        self.miss_distance[0]=[]
+        self.correction_to_hit[0]=[]
 
 
     def analyze(self):
@@ -52,18 +50,18 @@ class Ordered_Cricket_Analysis():
             drinks.append(throw.number_of_drinks)
 
             v = throw.target_value
-            self._hits[v].append(1 if v == throw.point_value else 0)
+            self.hits[v].append(1 if v == throw.point_value else 0)
 
             miss_delta = (throw.nearest_coord_in_target[0] - throw.cartesian_x, throw.nearest_coord_in_target[1] - throw.cartesian_y,)
-            self._correction_to_hit[v].append(miss_delta)
+            self.correction_to_hit[v].append(miss_delta)
 
-            self._miss_distance[v].append( Point(0,0).distance(Point(miss_delta)))
+            self.miss_distance[v].append(Point(0, 0).distance(Point(miss_delta)))
 
         # Aggregate all data for convenience
-        for key in self._hits:
-            self._hits[0].extend(self._hits[key])
-            self._miss_distance[0].extend(self._miss_distance[key])
-            self._correction_to_hit[0].extend(self._correction_to_hit[key])
+        for key in self.hits:
+            self.hits[0].extend(self.hits[key])
+            self.miss_distance[0].extend(self.miss_distance[key])
+            self.correction_to_hit[0].extend(self.correction_to_hit[key])
 
         return
 
