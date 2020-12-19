@@ -39,6 +39,13 @@ class Ordered_Cricket(Game_State):
                 return False
         return True
 
+    def get_thrower_target(self, thrower):
+        state = self.states[thrower]
+        for v in self.valid_throws:
+            if not state.is_closed(v):
+                return v
+        return -1
+
     def reset_game(self):
         self._reset_game()
 

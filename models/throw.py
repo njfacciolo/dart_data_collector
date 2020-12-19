@@ -20,7 +20,7 @@ class Throw:
 
     def __init__(self):
         self.time = time.time()
-        self.thrower = ''
+        self.thrower = 0
         self.thrower_name = ''
 
         # values are based around the board origin at 0,0
@@ -31,7 +31,11 @@ class Throw:
 
         self.point_value = 0
         self.multiplier = 0
+
+        # handled in post-game analysis
         self.number_of_drinks = 0
+        self.target_value = 0
+        self.nearest_coord_in_target = (0,0)
 
     def get_data_string(self):
         csv = '{},{},{},{},{},{},{},{},{}'.format(self.time, self.thrower_name, self.point_value, self.multiplier, self.number_of_drinks, self.cartesian_x, self.cartesian_y, self.polar_radius, self.polar_theta)

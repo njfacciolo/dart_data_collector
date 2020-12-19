@@ -59,11 +59,11 @@ def calculate_bac_curve(drinks):
     added_per_step = (1/ABSORPTION_RATE) * (step_minutes/60)
 
     drank_index = 0
-    while time < drinks[-1].time_of_drink:
+    while time < drinks[-1].time_of_drink + timedelta(hours=2):
         num_drinks = bac_curve[-1][1]
 
         # add to backlog to metabolize
-        while drinks[drank_index].time_of_drink < time:
+        while drank_index < len(drinks) and drinks[drank_index].time_of_drink < time:
             current_backlog += drinks[drank_index].get_alcohol_units()
             drank_index += 1
 
@@ -77,7 +77,9 @@ def calculate_bac_curve(drinks):
         bac_curve.append((time, num_drinks))
 
         time += timedelta(minutes=step_minutes)
-        print(num_drinks)
+
+        # Debugging
+        # print(num_drinks)
 
     return bac_curve
 
@@ -101,27 +103,31 @@ def generate_drink_from_data(data):
     return d
 
 
+def generate_dummy_drink_data(drinker_name = 'n', start_time=None):
+    dummy_drinks = []
+
+    if start_time is None:
+        t = datetime.now().replace(hour=12)
+    else:
+        t = start_time
+
+    for i in range(10):
+
+        d = Drink()
+        d.time_of_drink = t
+        d.drinker=drinker_name
+        d.volume_oz=12.0+ (random.randint(0,1)*4.0)
+        d.abv=5.0 + (random.random()*5.5) - 1.0
+        dummy_drinks.append(d)
+        minute_delta = (random.random() * 20) + 30
+        t = t + timedelta(minutes=minute_delta)
+    return calculate_bac_curve(dummy_drinks)
+
 
 if __name__ == "__main__":
     path = os.getcwd() + '//drinks//drink_log.csv'
 
     # drink_dic = load_daily_drinks(path)
-
-    dummy_drinks = []
-    t = datetime.now().replace(hour=12)
-    for i in range(10):
-
-        d = Drink()
-        d.time_of_drink = t
-        d.drinker='a'
-        d.volume_oz=12.0+ (random.randint(0,1)*4.0)
-        d.abv=5.0 + (random.random()*5.5) - 1.0
-        dummy_drinks.append(d)
-        minute_delta = (random.random() * 20) + 20
-        t = t + timedelta(minutes=minute_delta)
-
-        print('abv: {:.2f}  vol:  {:.2f}'.format(d.abv, d.volume_oz))
-
-    calculate_bac_curve(dummy_drinks)
+    dummy_curve = generate_dummy_drink_data()
 
 

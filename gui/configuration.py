@@ -8,11 +8,19 @@ CENTER = (750,750)
 # Diameter of each ring in pixels (of the fullsize image)
 DIAMETERS = (47,112,640,707,1055,1124)
 
+# MM dimensions gathered between:
+# https://www.dlgsc.wa.gov.au/sport-and-recreation/sports-dimensions-guide/darts
+# https://dartworldaustralia.com.au/wp-content/uploads/2020/02/dartboarddimensions.jpeg
+DIAMETERS_MM = (12.7, 31.8, 194, 214, 320, 340)
+
 # Dimensions of the board to put on the monitor. This is critical when re-using throw data
 DISPLAY_BOARD_SIZE = (900,900)
 
 # Draw the overlay onto the existing image
 DRAW_OVERLAY = False
+
+
+
 
 
 ## Alcohol Ingestion Parameters ##

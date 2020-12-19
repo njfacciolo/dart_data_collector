@@ -49,8 +49,8 @@ def generate_throw_from_data(data):
         vals.append(a)
 
 
-    t.point_value = vals[0]
-    t.multiplier = vals[1]
+    t.point_value = int(vals[0])
+    t.multiplier = int(vals[1])
     t.number_of_drinks = vals[2]
     t.cartesian_x = vals[3]
     t.cartesian_y = vals[4]

@@ -6,5 +6,9 @@ pip install numpy==1.17
 pip install opencv-python
 pip install Pillow
 
+linux -> pip install shapely
+windows -> conda install -c conda-forge shapely
+
+
 
 execute play.py
