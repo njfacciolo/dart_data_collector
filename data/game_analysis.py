@@ -12,10 +12,14 @@ from data import throw_util, drink_util
 from shapely.geometry import Point, Polygon
 from shapely.ops import nearest_points
 import gui.configuration as CONFIG
+import matplotlib as mpl
+import matplotlib.pyplot as plt
 
 POLYGONS = {}
 
-class Ordered_Cricket_Analysis():
+class Ordered_Cricket_Analysis:
+    plots = []
+
     def __init__(self, analyzed_throws):
         self.throws = analyzed_throws
         self.player_name = analyzed_throws[0].thrower_name
@@ -54,7 +58,9 @@ class Ordered_Cricket_Analysis():
             miss_delta = (throw.nearest_coord_in_target[0] - throw.cartesian_x, throw.nearest_coord_in_target[1] - throw.cartesian_y,)
             self.correction_to_hit[v].append(miss_delta)
 
-            self.miss_distance[v].append(Point(0, 0).distance(Point(miss_delta)))
+            miss_distance = Point(0, 0).distance(Point(miss_delta))
+            self.miss_distance[v].append(miss_distance)
+            throw.miss_distance = miss_distance
 
         self.average_num_drinks = np.average(drinks)
 
@@ -65,6 +71,18 @@ class Ordered_Cricket_Analysis():
             self.correction_to_hit[0].extend(self.correction_to_hit[key])
 
         return
+
+    def plot_throw_data(self):
+        x, y = [throw.number_of_drinks for throw in self.throws], [throw.miss_distance for throw in self.throws]
+        Ordered_Cricket_Analysis.plots.append(plt.scatter(x, y, label=self.player_name))
+
+    def show_plots(self):
+        plt.title('Accuracy vs Number of Drinks')
+        plt.xlabel('Number Of Drinks')
+        plt.ylabel('Distance to Target (mm)')
+        plt.legend()
+        plt.show()
+        Ordered_Cricket_Analysis.plots = []
 
 def analyze_game_ordered_cricket(throw_dic, drink_dic):
     # for thrower in dict
@@ -113,9 +131,24 @@ def analyze_game_ordered_cricket(throw_dic, drink_dic):
     print('\n')
     print('Game Average Miss Distance: {:.1f}mm, {:.1f}mm'.format(np.average(gd1.miss_distance[0]) * px2mm, np.average(gd2.miss_distance[0])*px2mm))
     for score in valid_throws:
-        print('{} Average Miss Distance: {:.1f}mm, {:.1f}mm'.format(score, np.average(gd1.miss_distance[score]) * px2mm,
-                                                                  np.average(gd2.miss_distance[score]) * px2mm))
+        d1 = gd1.correction_to_hit[score]
+        d2 = gd2.correction_to_hit[score]
+        xavg1, yavg1 = [x[0] for x in d1 if x[0] != 0], [y[1] for y in d1 if y[0] != 0]
+        xavg2, yavg2 = [x[0] for x in d2 if x[0] != 0], [y[1] for y in d2 if y[0] != 0]
+        for avgs in [xavg1, yavg1, xavg2, yavg2]:
+            if len(avgs) == 0:
+                avgs.append(0)
 
+
+        print('{} Average Miss Distance: {:.1f}mm, {:.1f}mm'.format(score, np.average(gd1.miss_distance[score]) * px2mm,
+                                                                        np.average(gd2.miss_distance[score]) * px2mm))
+        print('{} {} Average Missed By: {:.1f}mm, {:.1f}mm    {} Average Missed By: {:.1f}mm, {:.1f}mm'.format(score,
+                        gd1.player_name, np.average(xavg1) * px2mm, np.average(yavg1) * px2mm,
+                        gd2.player_name, np.average(xavg2) * px2mm, np.average(yavg2) * px2mm))
+
+    game_details[0].plot_throw_data()
+    game_details[1].plot_throw_data()
+    game_details[0].show_plots()
     return
 
 def calculate_drinks_at_time(time, drink_data):
@@ -199,9 +232,6 @@ def _build_polygon(value):
 
 if __name__ == "__main__":
     path = os.getcwd() + '//data_points//2020-12-18 23.56.38.csv'
-
-    _build_polygon(6)
-
 
     throw_dic = throw_util.load_game(path)
     game_start_time = None

@@ -36,6 +36,7 @@ class Throw:
         self.number_of_drinks = 0
         self.target_value = 0
         self.nearest_coord_in_target = (0,0)
+        self.miss_distance = 0
 
     def get_data_string(self):
         csv = '{},{},{},{},{},{},{},{},{}'.format(self.time, self.thrower_name, self.point_value, self.multiplier, self.number_of_drinks, self.cartesian_x, self.cartesian_y, self.polar_radius, self.polar_theta)
