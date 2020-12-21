@@ -5,6 +5,24 @@ from collections import defaultdict
 from data.parse_util import try_parse_float, try_parse_string
 from models.throw import Throw
 
+def load_days_games(directory, time=datetime.now()):
+    # list of dictionaries, each representing one game
+    ret = []
+    if not os.path.exists(directory):
+        return ret
+
+    # Generate the cutoff as 6am
+    cutoff = time
+    if cutoff.hour < 6:
+        cutoff = time - timedelta(days=1)
+    cutoff = cutoff.replace(hour=6, minute=0, second=0, microsecond=0)
+
+    csv_in_dir = [file for file in os.listdir(directory) if file.endswith('.csv')]
+    for file in csv_in_dir:
+        game_start_time = datetime.strptime(file.strip('.csv'), '%Y-%m-%d %H.%M.%S')
+        if( game_start_time > cutoff and game_start_time < time):
+            ret.append(load_game(directory+file))
+    return ret
 
 def load_game(file):
     # If the file doesn't exist, return an empty dic
@@ -60,6 +78,7 @@ def generate_throw_from_data(data):
     return t
 
 if __name__ == "__main__":
-    path = os.getcwd() + '//data_points//2020-12-18 23.56.38.csv'
+    load_days_games(directory=os.getcwd() + '//data_points//', time=datetime.now())
 
+    path = os.getcwd() + '//data_points//2020-12-18 23.56.38.csv'
     throw_dic = load_game(path)

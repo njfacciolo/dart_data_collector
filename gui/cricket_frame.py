@@ -8,6 +8,7 @@ from models.game_state import Game_State
 class Cricket(Game_State):
     def __init__(self, player_count):
         Game_State.__init__(self, player_count, 3)
+        self.game_name = 'cricket'
         self.valid_throws = [x for x in range(15,21,1)]
         self.valid_throws.append(25)
 
@@ -36,7 +37,6 @@ class Cricket_Frame(tk.Frame, Data_Writer, Cricket):
         tk.Frame.__init__(self, master, bg='white', *args, **kwargs)
         Cricket.__init__(self, 2)
         Data_Writer.__init__(self)
-
 
         self.current_thrower = 0
         self.dart_controller = controller

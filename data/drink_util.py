@@ -26,7 +26,7 @@ def load_daily_drinks(file, drinkers = None):
         cutoff = datetime.now() - timedelta(days=1)
     cutoff = cutoff.replace(hour=6, minute=0, second=0, microsecond=0)
 
-    print('Cut off is: {}'.format(cutoff))
+    # print('Cut off is: {}'.format(cutoff))
 
     with open(file, 'r') as drink_data:
         for row in reversed(list(csv.reader(drink_data))):
@@ -101,6 +101,7 @@ def generate_drink_from_data(data):
         return None
 
     return d
+
 
 
 def generate_dummy_drink_data(drinker_name = 'n', start_time=None):

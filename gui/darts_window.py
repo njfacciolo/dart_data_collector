@@ -4,6 +4,7 @@ from gui.dartboard_frame import Dartboard_Frame
 from gui.cricket_frame import Cricket_Frame
 from gui.cricket_ordered_frame import Cricket_Ordered_Frame
 from gui.drinks_frame import Drinks_Frame
+from data.game_analysis import analyze_day_ordered_cricket
 
 class Darts_Window(tk.Tk):
     def __init__(self):
@@ -32,7 +33,7 @@ class Darts_Window(tk.Tk):
 
         data_frame = Cricket_Ordered_Frame(master=self.tabbed_frame_games, controller=self)
         self.tabbed_frame_games.add(data_frame, text='Data')
-        self.tabbed_frame_games.select(cricket_frame)
+        self.tabbed_frame_games.select(data_frame)
         self.tabbed_frame_games.enable_traversal()
 
         self.available_games.append(cricket_frame)
@@ -56,9 +57,10 @@ class Darts_Window(tk.Tk):
 
     def game_ended(self):
         # print('Darts_Window:: The game has ended!')
-
-        # Generate a summary
-        # Generate a replay?
+        if self.current_game.game_name == 'ordered_cricket':
+            analyze_day_ordered_cricket()
+        # else:
+        #     analyze_game_cricket()
 
         # Reset the dartboard
         self.frame_dartboard._reset_display()
@@ -68,6 +70,8 @@ class Darts_Window(tk.Tk):
 
         # Remove the existing game from focus
         self.current_game = None
+
+
 
         # generate a new csv
 

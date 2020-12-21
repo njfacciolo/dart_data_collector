@@ -1,29 +1,36 @@
 import bisect
-from datetime import datetime, timedelta, timezone
 import os
-import numpy as np
-from gui.cricket_ordered_frame import Ordered_Cricket
-from data.geometry_util import deg2rad, pol2cart
 from collections import defaultdict
-import math
-from data.parse_util import try_parse_float, try_parse_string
-from models.throw import Throw
-from data import throw_util, drink_util
+from datetime import datetime
+
+import matplotlib.pyplot as plt
+import numpy as np
 from shapely.geometry import Point, Polygon
 from shapely.ops import nearest_points
+
 import gui.configuration as CONFIG
-import matplotlib as mpl
-import matplotlib.pyplot as plt
+from data import throw_util, drink_util
+from data.geometry_util import deg2rad, pol2cart
+from gui.cricket_ordered_frame import Ordered_Cricket
 
 POLYGONS = {}
 
 class Ordered_Cricket_Analysis:
     plots = []
 
-    def __init__(self, analyzed_throws):
-        self.throws = analyzed_throws
-        self.player_name = analyzed_throws[0].thrower_name
-        self.num_throws = len(analyzed_throws)
+    @staticmethod
+    def merge_data(analysis_list):
+        ret = Ordered_Cricket_Analysis()
+        for anal in analysis_list:
+            ret.merge(anal)
+        ret.analyze()
+        return ret
+
+    def __init__(self, analyzed_throws=None):
+        self.throws = analyzed_throws if analyzed_throws != None else []
+        self.player_name = analyzed_throws[0].thrower_name if analyzed_throws != None else ''
+        self.num_throws = len(analyzed_throws) if analyzed_throws != None else 0
+
 
         # key 0 is a quick lookup for all throws\
 
@@ -42,6 +49,12 @@ class Ordered_Cricket_Analysis:
         self.hits[0]=[]
         self.miss_distance[0]=[]
         self.correction_to_hit[0]=[]
+
+    def merge(self, analysis):
+        self.throws.extend(analysis.throws)
+        if self.player_name == '':
+            self.player_name = self.throws[0].thrower_name
+        self.num_throws = len(self.throws)
 
     def analyze(self):
         if self.throws is None:
@@ -76,7 +89,8 @@ class Ordered_Cricket_Analysis:
         x, y = [throw.number_of_drinks for throw in self.throws], [throw.miss_distance for throw in self.throws]
         Ordered_Cricket_Analysis.plots.append(plt.scatter(x, y, label=self.player_name))
 
-    def show_plots(self):
+    @staticmethod
+    def show_plots():
         plt.title('Accuracy vs Number of Drinks')
         plt.xlabel('Number Of Drinks')
         plt.ylabel('Distance to Target (mm)')
@@ -84,38 +98,49 @@ class Ordered_Cricket_Analysis:
         plt.show()
         Ordered_Cricket_Analysis.plots = []
 
+def analyze_day_ordered_cricket(time=datetime.now()):
+    # list of dictionaries. Each dictionary should have two entries - one for each player in game
+    games = throw_util.load_days_games(os.getcwd() + '//data//data_points//', time)
+    if games == None:
+        print('Found no games on {}'.format(time))
+        return
+
+    # Store the player names for future use
+    players = []
+
+    for game in games:
+        if game is None:
+            continue
+
+        for player in game.keys():
+            if player not in players:
+                players.append(player)
+
+    drink_dic = drink_util.load_daily_drinks(os.getcwd() + '//data//drinks//drink_log.csv', players)
+    drink_curves = {}
+    for drinker in drink_dic:
+        drink_curves[drinker] = drink_util.calculate_bac_curve(drink_dic[drinker])
+
+    analyzed_games = []
+    for game in games:
+        analyzed_games.extend(set_all_throw_details(game, drink_curves))
+
+    merged_data = {}
+    for player in players:
+        merged_data[player] = Ordered_Cricket_Analysis.merge_data([game for game in analyzed_games if game.player_name == player])
+        merged_data[player].analyze()
+        merged_data[player].plot_throw_data()
+
+    Ordered_Cricket_Analysis.show_plots()
+
 def analyze_game_ordered_cricket(throw_dic, drink_dic):
-    # for thrower in dict
-    # for throw in throws
-    # set throw target
-    # calculate accuracy of throw
-    # apply num drinks at toss
-    # store data
+    analysis = set_all_throw_details(throw_dic, drink_dic)
 
-    # create a dummy game for tracking scores
-    dummy_game = Ordered_Cricket(player_count=2)
-
-    game_details = []
-
-    for i, thrower in enumerate(throw_dic):
-        if thrower not in drink_dic:
-            print('Failed to find drink data for {}.'.format(thrower))
-            drink_dic[thrower] = ((datetime.now(), 0.0))
-        for throw in throw_dic[thrower]:
-            throw.thrower = i
-            throw.number_of_drinks = calculate_drinks_at_time(throw.time, drink_dic[thrower])
-            throw.target_value = dummy_game.get_thrower_target(i)
-            throw.nearest_coord_in_target = calculate_nearest_coord_in_target(throw)
-            dummy_game.add_throw(throw)
-
-        # Create a new analysis with the data
-        game_details.append( Ordered_Cricket_Analysis(throw_dic[thrower]))
-
-    for gd in game_details:
-        gd.analyze()
+    for anal in analysis:
+        anal.analyze()
 
     # visualize info?
-    gd1, gd2 = game_details[0], game_details[1]
+    gd1, gd2 = analysis[0], analysis[1]
     print('Stat: {}, {}'.format(gd1.player_name, gd2.player_name))
     print('Average Drinks: {:.2f}, {:.2f}'.format(gd1.average_num_drinks, gd2.average_num_drinks))
     print('Num Throws: {}, {}'.format(gd1.num_throws, gd2.num_throws))
@@ -146,30 +171,58 @@ def analyze_game_ordered_cricket(throw_dic, drink_dic):
                         gd1.player_name, np.average(xavg1) * px2mm, np.average(yavg1) * px2mm,
                         gd2.player_name, np.average(xavg2) * px2mm, np.average(yavg2) * px2mm))
 
-    game_details[0].plot_throw_data()
-    game_details[1].plot_throw_data()
-    game_details[0].show_plots()
+    analysis[0].plot_throw_data()
+    analysis[1].plot_throw_data()
+    analysis[0].show_plots()
     return
 
-def calculate_drinks_at_time(time, drink_data):
-    if time is None or drink_data is None or drink_data is []:
+def set_all_throw_details(throw_dic, drink_dic):
+    # for thrower in dict
+        # for throw in throws
+            # set throw target
+    # calculate accuracy of throw
+    # apply num drinks at toss
+    # store data
+    # create a dummy game for tracking scores
+    dummy_game = Ordered_Cricket(player_count=2)
+    analysis = []
+
+    #For each throw in the game, set the number of drinks, target value, and nearest coordinate to points
+    for i, thrower in enumerate(throw_dic):
+        if thrower not in drink_dic:
+            print('Failed to find drink data for {}.'.format(thrower))
+            drink_dic[thrower] = ((datetime.now(), 0.0))
+        for throw in throw_dic[thrower]:
+            throw.thrower = i
+            throw.number_of_drinks = calculate_drinks_at_time(throw.time, drink_dic[thrower])
+            throw.target_value = dummy_game.get_thrower_target(i)
+            throw.nearest_coord_in_target = calculate_nearest_coord_in_target(throw)
+            dummy_game.add_throw(throw)
+
+        # Create a new analysis with the data
+        analysis.append( Ordered_Cricket_Analysis(throw_dic[thrower]))
+
+    return analysis
+
+def calculate_drinks_at_time(time, drink_curve):
+    if time is None or drink_curve is None or drink_curve is []:
         return 0.0
 
-    if len(drink_data) is 1:
-        return drink_data[0][1]
+    if len(drink_curve) is 1:
+        return drink_curve[0][1]
 
     # drink data is in format (time, num drinks)
     to_insert = (time,-1.0)
-    index = bisect.bisect_left(drink_data, to_insert)
+    index = bisect.bisect_left(drink_curve, to_insert)
 
     if index == 0:
-        return drink_data[0][1]
+        return drink_curve[0][1]
 
-    if index >= len(drink_data):
-        return drink_data[-1][1]
+    if index >= len(drink_curve):
+        return drink_curve[-1][1]
 
     # Perform linear approximation
-    p1, p2 = drink_data[index-1], drink_data[index]
+    p1, p2 = drink_curve[index - 1], drink_curve[index]
     t1, t2 = p1[0], p2[1]
 
     slope = (p2[1]-p1[1]) / (p2[0]-p1[0]).total_seconds()
@@ -230,19 +283,22 @@ def _build_polygon(value):
     ret = pie.difference(bulls)
     return ret
 
+
 if __name__ == "__main__":
-    path = os.getcwd() + '//data_points//2020-12-18 23.56.38.csv'
+    # path = os.getcwd() + '//data_points//2020-12-18 23.56.38.csv'
+    #
+    # throw_dic = throw_util.load_game(path)
+    # game_start_time = None
+    # for key in throw_dic:
+    #     if game_start_time is None or throw_dic[key][0].time < game_start_time:
+    #         game_start_time = throw_dic[key][0].time
+    #
+    # n_drink_curve = drink_util.generate_dummy_drink_data('n', game_start_time)
+    # c_drink_curve = drink_util.generate_dummy_drink_data('c', game_start_time)
+    # drink_dic = {}
+    # drink_dic['n'] = n_drink_curve
+    # drink_dic['c'] = c_drink_curve
+    #
+    # analyze_game_ordered_cricket(throw_dic, drink_dic)
 
-    throw_dic = throw_util.load_game(path)
-    game_start_time = None
-    for key in throw_dic:
-        if game_start_time is None or throw_dic[key][0].time < game_start_time:
-            game_start_time = throw_dic[key][0].time
-
-    n_drink_curve = drink_util.generate_dummy_drink_data('n', game_start_time)
-    c_drink_curve = drink_util.generate_dummy_drink_data('c', game_start_time)
-    drink_dic = {}
-    drink_dic['n'] = n_drink_curve
-    drink_dic['c'] = c_drink_curve
-
-    analyze_game_ordered_cricket(throw_dic, drink_dic)
+    analyze_day_ordered_cricket()

@@ -10,6 +10,7 @@ class Ordered_Cricket(Game_State):
         Game_State.__init__(self, player_count, 3)
         self.valid_throws = [x for x in range(20,14,-1)]
         self.valid_throws.append(25)
+        self.game_name = 'ordered_cricket'
 
     def add_throw(self, throw):
         if not throw.point_value in self.valid_throws:
