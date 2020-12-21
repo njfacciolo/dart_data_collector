@@ -11,7 +11,7 @@ class Throw:
 
     @staticmethod
     def get_data_format():
-        return "Time,Thrower,Sector,Multiplier,Drinks,RawX,RawY,PolarRadius,PolarAngle"
+        return "Time,ThrowerID,Thrower,Sector,Multiplier,Drinks,RawX,RawY,PolarRadius,PolarAngle"
 
     def set_calibration_(self, angular_offset, radiuses ):
         Throw.angularOffset = angular_offset
@@ -39,7 +39,7 @@ class Throw:
         self.miss_distance = 0
 
     def get_data_string(self):
-        csv = '{},{},{},{},{},{},{},{},{}'.format(self.time, self.thrower_name, self.point_value, self.multiplier, self.number_of_drinks, self.cartesian_x, self.cartesian_y, self.polar_radius, self.polar_theta)
+        csv = '{},{},{},{},{},{},{},{},{},{}'.format(self.time,self.thrower,self.thrower_name, self.point_value, self.multiplier, self.number_of_drinks, self.cartesian_x, self.cartesian_y, self.polar_radius, self.polar_theta)
         return csv
 
     def set_thrower(self, thrower):

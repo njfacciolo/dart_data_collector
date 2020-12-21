@@ -13,6 +13,7 @@ from data import throw_util, drink_util
 from data.geometry_util import deg2rad, pol2cart
 from gui.cricket_ordered_frame import Ordered_Cricket
 
+plt.ion()
 POLYGONS = {}
 
 class Ordered_Cricket_Analysis:
@@ -27,9 +28,14 @@ class Ordered_Cricket_Analysis:
         return ret
 
     def __init__(self, analyzed_throws=None):
-        self.throws = analyzed_throws if analyzed_throws != None else []
-        self.player_name = analyzed_throws[0].thrower_name if analyzed_throws != None else ''
-        self.num_throws = len(analyzed_throws) if analyzed_throws != None else 0
+        if analyzed_throws == [] or analyzed_throws is None:
+            self.throws = []
+            self.player_name = ''
+            self.num_throws = 0
+        else:
+            self.throws = analyzed_throws
+            self.player_name =  analyzed_throws[0].thrower_name
+            self.num_throws = len(analyzed_throws)
 
 
         # key 0 is a quick lookup for all throws\
@@ -101,7 +107,7 @@ class Ordered_Cricket_Analysis:
 def analyze_day_ordered_cricket(time=datetime.now()):
     # list of dictionaries. Each dictionary should have two entries - one for each player in game
     games = throw_util.load_days_games(os.getcwd() + '//data//data_points//', time)
-    if games == None:
+    if games == None or len(games) == 0:
         print('Found no games on {}'.format(time))
         return
 
@@ -112,9 +118,9 @@ def analyze_day_ordered_cricket(time=datetime.now()):
         if game is None:
             continue
 
-        for player in game.keys():
-            if player not in players:
-                players.append(player)
+        for player_id in game.keys():
+            if game[player_id][0].thrower_name not in players:
+                players.append(game[player_id][0].thrower_name)
 
     drink_dic = drink_util.load_daily_drinks(os.getcwd() + '//data//drinks//drink_log.csv', players)
     drink_curves = {}
@@ -188,19 +194,19 @@ def set_all_throw_details(throw_dic, drink_dic):
     analysis = []
 
     #For each throw in the game, set the number of drinks, target value, and nearest coordinate to points
-    for i, thrower in enumerate(throw_dic):
+    for thrower_id in throw_dic:
+        thrower = throw_dic[thrower_id][0].thrower_name
         if thrower not in drink_dic:
             print('Failed to find drink data for {}.'.format(thrower))
-            drink_dic[thrower] = ((datetime.now(), 0.0))
-        for throw in throw_dic[thrower]:
-            throw.thrower = i
+            drink_dic[thrower] = [(datetime.now(), 0.0)]
+        for throw in throw_dic[thrower_id]:
             throw.number_of_drinks = calculate_drinks_at_time(throw.time, drink_dic[thrower])
-            throw.target_value = dummy_game.get_thrower_target(i)
+            throw.target_value = dummy_game.get_thrower_target(thrower_id)
             throw.nearest_coord_in_target = calculate_nearest_coord_in_target(throw)
             dummy_game.add_throw(throw)
 
         # Create a new analysis with the data
-        analysis.append( Ordered_Cricket_Analysis(throw_dic[thrower]))
+        analysis.append( Ordered_Cricket_Analysis(throw_dic[thrower_id]))
 
     return analysis
 
@@ -251,7 +257,6 @@ def _build_polygon(value):
     scaling_ratio = CONFIG.DISPLAY_BOARD_SIZE[0] / CONFIG.DARTBOARD_IMAGE_DIMENSIONS[0]
     outter_radius = CONFIG.DIAMETERS[-1] * scaling_ratio
 
-    arc_segments = 150
     # start with getting the swept angle based on the target point value
     value_list = [6, 13, 4, 18, 1, 20, 5, 12, 9, 14, 11, 8, 16, 7, 19, 3, 17, 2, 15, 10]
 

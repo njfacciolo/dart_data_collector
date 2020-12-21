@@ -20,7 +20,7 @@ def load_days_games(directory, time=datetime.now()):
     csv_in_dir = [file for file in os.listdir(directory) if file.endswith('.csv')]
     for file in csv_in_dir:
         game_start_time = datetime.strptime(file.strip('.csv'), '%Y-%m-%d %H.%M.%S')
-        if( game_start_time > cutoff and game_start_time < time):
+        if( game_start_time > cutoff and game_start_time < time + timedelta(minutes=2)):
             ret.append(load_game(directory+file))
     return ret
 
@@ -39,13 +39,13 @@ def load_game(file):
             throw = generate_throw_from_data(row)
 
             if throw is not None:
-                ret[throw.thrower_name].append(throw)
+                ret[throw.thrower].append(throw)
             else:
                 break
     return ret
 
 def generate_throw_from_data(data):
-    # Time, Thrower, sector, multiplier, drinks (unused), x, y, polar_radius, polar_angle
+    # Time, ThrowerID, Thrower, sector, multiplier, drinks (unused), x, y, polar_radius, polar_angle
     float_time, success = try_parse_float(data[0].strip())
     if not success:
         return None
@@ -54,13 +54,14 @@ def generate_throw_from_data(data):
     time = int(float_time)
 
     t.time = datetime.fromtimestamp(time)
-    t.thrower_name, name_parsed= try_parse_string(data[1])
+    t.thrower_name, name_parsed= try_parse_string(data[2])
+    t.thrower = int(data[1])
 
     if not name_parsed:
         return None
 
     vals = []
-    for i in range(2, len(data)):
+    for i in range(3, len(data)):
         a, succ = try_parse_float(data[i])
         if not succ:
             return None
