@@ -12,9 +12,14 @@ import gui.configuration as CONFIG
 from data import throw_util, drink_util
 from data.geometry_util import deg2rad, pol2cart
 from gui.cricket_ordered_frame import Ordered_Cricket
+from models.throw import Throw
+from random import random
+import math
 
 plt.ion()
 POLYGONS = {}
+NUMBER_OF_BINS = 15
+
 
 class Ordered_Cricket_Analysis:
     plots = []
@@ -93,6 +98,35 @@ class Ordered_Cricket_Analysis:
 
     def plot_throw_data(self):
         x, y = [throw.number_of_drinks for throw in self.throws], [throw.miss_distance for throw in self.throws]
+
+        max_drinks = math.ceil((max(self.throws, key=lambda x: x.number_of_drinks)).number_of_drinks)
+
+        # If we haven't been drinking, this doesn't really matter
+        if max_drinks != 0:
+            bins = np.linspace(0, max_drinks, NUMBER_OF_BINS)
+
+            # Sort the data into appropriate bins
+            data_dic = defaultdict(lambda: [])
+            for throw in self.throws:
+                idx = bisect.bisect_left(bins, throw.number_of_drinks)
+                if idx == 0 or idx == 1:
+                    data_dic[bins[0]].append(throw.miss_distance)
+                else:
+                    data_dic[idx - 1].append(throw.miss_distance)
+
+            # Calculate average accuracy for each bin
+            y = []
+            for i, key in enumerate(bins):
+                data = data_dic[i]
+                if len(data) == 0:
+                    y.append(0)
+                else:
+                    y.append(np.average(data))
+
+            # Plot the data in a line graph
+            Ordered_Cricket_Analysis.plots.append(plt.plot(bins, y, label=self.player_name))
+            return
+
         Ordered_Cricket_Analysis.plots.append(plt.scatter(x, y, label=self.player_name))
 
     @staticmethod
@@ -305,5 +339,35 @@ if __name__ == "__main__":
     # drink_dic['c'] = c_drink_curve
     #
     # analyze_game_ordered_cricket(throw_dic, drink_dic)
+
+    throws = []
+    for i in range(100):
+        throws.append(Throw())
+        throws[-1].number_of_drinks = random()*5
+        throws[-1].miss_distance = 0 if random() < .1 else random()*100
+
+    min_drinks = 0
+    max_drinks = math.ceil((max(throws, key=lambda x: x.number_of_drinks)).number_of_drinks)
+
+    num_bins = 15
+    bins = np.linspace(0,max_drinks, num_bins)
+    data_dic = defaultdict(lambda: [])
+    for throw in throws:
+        idx = bisect.bisect_left(bins, throw.number_of_drinks)
+        if idx == 0 or idx == 1:
+            data_dic[bins[0]].append(throw.miss_distance)
+        else:
+            data_dic[idx-1].append(throw.miss_distance)
+
+    y = []
+    for i, key in enumerate(bins):
+        data = data_dic[i]
+        if len(data) == 0:
+            y.append(0)
+        else:
+            y.append(np.average(data))
+
+    plt.plot(bins, y)
+    plt.show()
 
     analyze_day_ordered_cricket()
