@@ -41,6 +41,7 @@ def load_daily_drinks(file, drinkers = None):
     return ret
 
 def calculate_bac_curve(drinks):
+    drinks.sort(key= lambda x: x.time_of_drink)
     bac_curve = []
     if drinks is None or len(drinks) < 1:
         return []

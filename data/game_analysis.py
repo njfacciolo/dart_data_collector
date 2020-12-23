@@ -127,7 +127,8 @@ class Ordered_Cricket_Analysis:
             Ordered_Cricket_Analysis.plots.append(plt.plot(bins, y, label=self.player_name))
             return
 
-        Ordered_Cricket_Analysis.plots.append(plt.scatter(x, y, label=self.player_name))
+        Ordered_Cricket_Analysis.plots.append(plt.plot(x, y, label=self.player_name))
+        return
 
     @staticmethod
     def show_plots():
@@ -135,14 +136,17 @@ class Ordered_Cricket_Analysis:
         plt.xlabel('Number Of Drinks')
         plt.ylabel('Distance to Target (mm)')
         plt.legend()
-        plt.show()
+        plt.show(block=True)
         Ordered_Cricket_Analysis.plots = []
 
 def analyze_day_ordered_cricket(time=datetime.now()):
     # list of dictionaries. Each dictionary should have two entries - one for each player in game
+    target_dir = os.getcwd() + '//data//data_points//'
     games = throw_util.load_days_games(os.getcwd() + '//data//data_points//', time)
+    # games = throw_util.load_days_games(os.getcwd() + '//data_points//', time)
+
     if games == None or len(games) == 0:
-        print('Found no games on {}'.format(time))
+        print('Found no games in {} on {}'.format(target_dir, time))
         return
 
     # Store the player names for future use
@@ -157,9 +161,13 @@ def analyze_day_ordered_cricket(time=datetime.now()):
                 players.append(game[player_id][0].thrower_name)
 
     drink_dic = drink_util.load_daily_drinks(os.getcwd() + '//data//drinks//drink_log.csv', players)
+    # drink_dic = drink_util.load_daily_drinks(os.getcwd() + '//drinks//drink_log.csv', players)
+
     drink_curves = {}
     for drinker in drink_dic:
         drink_curves[drinker] = drink_util.calculate_bac_curve(drink_dic[drinker])
+
+    # print('Analyzing drink data for {}'.format(drink_curves.keys()))
 
     analyzed_games = []
     for game in games:
@@ -340,34 +348,6 @@ if __name__ == "__main__":
     #
     # analyze_game_ordered_cricket(throw_dic, drink_dic)
 
-    throws = []
-    for i in range(100):
-        throws.append(Throw())
-        throws[-1].number_of_drinks = random()*5
-        throws[-1].miss_distance = 0 if random() < .1 else random()*100
-
-    min_drinks = 0
-    max_drinks = math.ceil((max(throws, key=lambda x: x.number_of_drinks)).number_of_drinks)
-
-    num_bins = 15
-    bins = np.linspace(0,max_drinks, num_bins)
-    data_dic = defaultdict(lambda: [])
-    for throw in throws:
-        idx = bisect.bisect_left(bins, throw.number_of_drinks)
-        if idx == 0 or idx == 1:
-            data_dic[bins[0]].append(throw.miss_distance)
-        else:
-            data_dic[idx-1].append(throw.miss_distance)
-
-    y = []
-    for i, key in enumerate(bins):
-        data = data_dic[i]
-        if len(data) == 0:
-            y.append(0)
-        else:
-            y.append(np.average(data))
-
-    plt.plot(bins, y)
-    plt.show()
-
+    plt.ion()
     analyze_day_ordered_cricket()
+
