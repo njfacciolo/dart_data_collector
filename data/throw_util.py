@@ -33,7 +33,7 @@ def load_game(file):
     with open(file, 'r') as throw_data:
         firstline = True
         for row in list(csv.reader(throw_data)):
-            if firstline:
+            if firstline or row is None or len(row) == 0:
                 firstline = False
                 continue
             throw = generate_throw_from_data(row)

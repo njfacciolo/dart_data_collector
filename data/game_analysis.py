@@ -9,12 +9,13 @@ from shapely.geometry import Point, Polygon
 from shapely.ops import nearest_points
 
 import gui.configuration as CONFIG
-from data import throw_util, drink_util
+from data import throw_util, drink_util, parse_util
 from data.geometry_util import deg2rad, pol2cart
 from gui.cricket_ordered_frame import Ordered_Cricket
 from models.throw import Throw
 from random import random
 import math
+
 
 plt.ion()
 POLYGONS = {}
@@ -160,7 +161,7 @@ def analyze_day_ordered_cricket(time=datetime.now()):
             if game[player_id][0].thrower_name not in players:
                 players.append(game[player_id][0].thrower_name)
 
-    drink_dic = drink_util.load_daily_drinks(os.getcwd() + '//data//drinks//drink_log.csv', players)
+    drink_dic = drink_util.load_daily_drinks(os.getcwd() + '//data//drinks//drink_log.csv', drinkers=players)
     # drink_dic = drink_util.load_daily_drinks(os.getcwd() + '//drinks//drink_log.csv', players)
 
     drink_curves = {}
@@ -181,7 +182,23 @@ def analyze_day_ordered_cricket(time=datetime.now()):
 
     Ordered_Cricket_Analysis.show_plots()
 
-def analyze_game_ordered_cricket(throw_dic, drink_dic):
+def analyze_game_ordered_cricket(game_path):
+    if not os.path.exists(game_path):
+        print('Failed to find game at location: {}  Skipping game analysis...'.format(game_path))
+        return
+
+    throw_dic = throw_util.load_game(game_path)
+    date = datetime.strptime((parse_util.path_leaf(game_path)).strip('.csv'), '%Y-%m-%d %H.%M.%S')
+
+    drink_dic = drink_util.load_daily_drinks(game_path+'..//drinks//drink_log.csv', time=date)
+    drink_curves = {}
+    for drinker in drink_dic:
+        drink_curves[drinker] = drink_util.calculate_bac_curve(drink_dic[drinker])
+
+    analyze_ordered_cricket(throw_dic, drink_dic)
+
+
+def analyze_ordered_cricket(throw_dic, drink_dic):
     analysis = set_all_throw_details(throw_dic, drink_dic)
 
     for anal in analysis:
@@ -219,9 +236,9 @@ def analyze_game_ordered_cricket(throw_dic, drink_dic):
                         gd1.player_name, np.average(xavg1) * px2mm, np.average(yavg1) * px2mm,
                         gd2.player_name, np.average(xavg2) * px2mm, np.average(yavg2) * px2mm))
 
-    analysis[0].plot_throw_data()
-    analysis[1].plot_throw_data()
-    analysis[0].show_plots()
+    # analysis[0].plot_throw_data()
+    # analysis[1].plot_throw_data()
+    # analysis[0].show_plots()
     return
 
 def set_all_throw_details(throw_dic, drink_dic):

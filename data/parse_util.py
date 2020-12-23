@@ -1,3 +1,5 @@
+import ntpath
+
 def try_parse_float(value):
     try:
         return float(value), True
@@ -13,3 +15,7 @@ def try_parse_string(value):
             return None, False
     except ValueError:
         return None, False
+
+def path_leaf(path):
+    head, tail = ntpath.split(path)
+    return tail or ntpath.basename(head)

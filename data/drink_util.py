@@ -8,7 +8,7 @@ import random
 from data.parse_util import try_parse_float
 
 
-def load_daily_drinks(file, drinkers = None):
+def load_daily_drinks(file, time=datetime.now(), drinkers = None):
     # if drinkers is None -> load all drinkers
     ret = defaultdict(lambda: [])
     if not os.path.exists(file):
@@ -21,7 +21,7 @@ def load_daily_drinks(file, drinkers = None):
     # cutoff = datetime.now(tz)
 
     # Generate the cutoff as 6am
-    cutoff = datetime.now()
+    cutoff = time
     if cutoff.hour < 6:
         cutoff = datetime.now() - timedelta(days=1)
     cutoff = cutoff.replace(hour=6, minute=0, second=0, microsecond=0)
