@@ -109,13 +109,14 @@ class Cricket_Ordered_Frame(tk.Frame, Data_Writer, Ordered_Cricket):
         return False
 
     def _update_score_board(self, throw, image):
+        self.header.set_score(throw.thrower, self.states[throw.thrower].number_of_throws)
+
         key = 'B' if throw.point_value == 25 else str(throw.point_value)
         if key not in self.score_frames:
             return
         frame = self.score_frames[key]
         frame.set_score(throw.thrower, image)
 
-        self.header.set_score(throw.thrower, self.states[throw.thrower].number_of_throws)
 
     def _reset_score_board(self):
         self.reset_game()

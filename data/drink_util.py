@@ -23,16 +23,19 @@ def load_daily_drinks(file, time=datetime.now(), drinkers = None):
     # Generate the cutoff as 6am
     cutoff = time
     if cutoff.hour < 6:
-        cutoff = datetime.now() - timedelta(days=1)
+        cutoff = time - timedelta(days=1)
     cutoff = cutoff.replace(hour=6, minute=0, second=0, microsecond=0)
 
     # print('Cut off is: {}'.format(cutoff))
 
     with open(file, 'r') as drink_data:
         for row in reversed(list(csv.reader(drink_data))):
+            if row == '':
+                continue
+
             drink = generate_drink_from_data(row)
 
-            if drink is not None and drink.time_of_drink > cutoff:
+            if drink != None and drink.time_of_drink > cutoff:
                 if drinkers is None or drink.drinker in drinkers:
                     ret[drink.drinker].append(drink)
             else:
