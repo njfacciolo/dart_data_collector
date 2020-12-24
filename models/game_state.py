@@ -14,9 +14,9 @@ class Game_State:
         for player in range(self.player_count):
             self.states.append(Game_Score(self.to_close))
 
-
     def update_state(self, throw):
         assert throw.thrower < len(self.states)
+
 
         state = self.states[throw.thrower]
         remainder = state.add_throw(throw)
@@ -61,6 +61,7 @@ class Game_Score:
         for i in range(1,21,1):
             self.status[str(i)] = []
         self.status['b'] = []
+        self.number_of_throws = 0
 
     def add_throw(self, throw):
         # add to score, return remainder of points that could go to final score

@@ -17,7 +17,6 @@ from random import random
 import math
 
 
-plt.ion()
 POLYGONS = {}
 NUMBER_OF_BINS = 15
 
@@ -133,11 +132,13 @@ class Ordered_Cricket_Analysis:
 
     @staticmethod
     def show_plots():
+        plt.ion()
         plt.title('Accuracy vs Number of Drinks')
         plt.xlabel('Number Of Drinks')
-        plt.ylabel('Distance to Target (mm)')
+        plt.ylabel('Average Distance to Target (mm)')
         plt.legend()
-        plt.show(block=True)
+        # plt.show(block=True)
+        plt.show()
         Ordered_Cricket_Analysis.plots = []
 
 def analyze_day_ordered_cricket(time=datetime.now()):
@@ -181,6 +182,7 @@ def analyze_day_ordered_cricket(time=datetime.now()):
         merged_data[player].plot_throw_data()
 
     Ordered_Cricket_Analysis.show_plots()
+    return
 
 def analyze_game_ordered_cricket(game_path):
     if not os.path.exists(game_path):
@@ -190,16 +192,16 @@ def analyze_game_ordered_cricket(game_path):
     throw_dic = throw_util.load_game(game_path)
     date = datetime.strptime((parse_util.path_leaf(game_path)).strip('.csv'), '%Y-%m-%d %H.%M.%S')
 
-    drink_dic = drink_util.load_daily_drinks(game_path+'..//drinks//drink_log.csv', time=date)
+    drink_dic = drink_util.load_daily_drinks(os.getcwd() +'//data//drinks//drink_log.csv', time=date)
     drink_curves = {}
     for drinker in drink_dic:
         drink_curves[drinker] = drink_util.calculate_bac_curve(drink_dic[drinker])
 
-    analyze_ordered_cricket(throw_dic, drink_dic)
+    analyze_ordered_cricket(throw_dic, drink_curves)
 
 
-def analyze_ordered_cricket(throw_dic, drink_dic):
-    analysis = set_all_throw_details(throw_dic, drink_dic)
+def analyze_ordered_cricket(throw_dic, drink_curve_dic):
+    analysis = set_all_throw_details(throw_dic, drink_curve_dic)
 
     for anal in analysis:
         anal.analyze()
@@ -232,16 +234,16 @@ def analyze_ordered_cricket(throw_dic, drink_dic):
 
         print('{} Average Miss Distance: {:.1f}mm, {:.1f}mm'.format(score, np.average(gd1.miss_distance[score]) * px2mm,
                                                                         np.average(gd2.miss_distance[score]) * px2mm))
-        print('{} {} Average Missed By: {:.1f}mm, {:.1f}mm    {} Average Missed By: {:.1f}mm, {:.1f}mm'.format(score,
-                        gd1.player_name, np.average(xavg1) * px2mm, np.average(yavg1) * px2mm,
-                        gd2.player_name, np.average(xavg2) * px2mm, np.average(yavg2) * px2mm))
+        # print('{} {} Average Missed By: {:.1f}mm, {:.1f}mm    {} Average Missed By: {:.1f}mm, {:.1f}mm'.format(score,
+        #                 gd1.player_name, np.average(xavg1) * px2mm, np.average(yavg1) * px2mm,
+        #                 gd2.player_name, np.average(xavg2) * px2mm, np.average(yavg2) * px2mm))
 
     # analysis[0].plot_throw_data()
     # analysis[1].plot_throw_data()
     # analysis[0].show_plots()
     return
 
-def set_all_throw_details(throw_dic, drink_dic):
+def set_all_throw_details(throw_dic, drink_curve_dic):
     # for thrower in dict
         # for throw in throws
             # set throw target
@@ -255,11 +257,11 @@ def set_all_throw_details(throw_dic, drink_dic):
     #For each throw in the game, set the number of drinks, target value, and nearest coordinate to points
     for thrower_id in throw_dic:
         thrower = throw_dic[thrower_id][0].thrower_name
-        if thrower not in drink_dic:
+        if thrower not in drink_curve_dic:
             print('Failed to find drink data for {}.'.format(thrower))
-            drink_dic[thrower] = [(datetime.now(), 0.0)]
+            drink_curve_dic[thrower] = [(datetime.now(), 0.0)]
         for throw in throw_dic[thrower_id]:
-            throw.number_of_drinks = calculate_drinks_at_time(throw.time, drink_dic[thrower])
+            throw.number_of_drinks = calculate_drinks_at_time(throw.time, drink_curve_dic[thrower])
             throw.target_value = dummy_game.get_thrower_target(thrower_id)
             throw.nearest_coord_in_target = calculate_nearest_coord_in_target(throw)
             dummy_game.add_throw(throw)

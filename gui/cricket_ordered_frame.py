@@ -13,10 +13,14 @@ class Ordered_Cricket(Game_State):
         self.game_name = 'ordered_cricket'
 
     def add_throw(self, throw):
+        score = self.states[throw.thrower]
+        score.number_of_throws += 1
+
         if not throw.point_value in self.valid_throws:
             return '0'
 
-        score = self.states[throw.thrower]
+
+
         for valid_throw in self.valid_throws:
             if throw.point_value == valid_throw:
                 return self.update_state(throw)
@@ -111,7 +115,7 @@ class Cricket_Ordered_Frame(tk.Frame, Data_Writer, Ordered_Cricket):
         frame = self.score_frames[key]
         frame.set_score(throw.thrower, image)
 
-        self.header.set_score(throw.thrower, self.states[throw.thrower].score)
+        self.header.set_score(throw.thrower, self.states[throw.thrower].number_of_throws)
 
     def _reset_score_board(self):
         self.reset_game()
