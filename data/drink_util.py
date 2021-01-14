@@ -7,6 +7,27 @@ from gui.configuration import METABOLIC_RATE, ABSORPTION_RATE
 import random
 from data.parse_util import try_parse_float
 
+def load_all_drinks(file, drinkers = None):
+    # if drinkers is None -> load all drinkers
+    ret = defaultdict(lambda: [])
+    if not os.path.exists(file):
+        return ret
+
+
+    # print('Cut off is: {}'.format(cutoff))
+
+    with open(file, 'r') as drink_data:
+        for row in list(csv.reader(drink_data)):
+            if row == '':
+                continue
+
+            drink = generate_drink_from_data(row)
+
+            if drink != None:
+                if drinkers is None or drink.drinker in drinkers:
+                    ret[drink.drinker].append(drink)
+
+    return ret
 
 def load_daily_drinks(file, time=datetime.now(), drinkers = None):
     # if drinkers is None -> load all drinkers

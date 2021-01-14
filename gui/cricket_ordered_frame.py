@@ -12,6 +12,8 @@ class Ordered_Cricket(Game_State):
         self.valid_throws.append(25)
         self.game_name = 'ordered_cricket'
 
+
+
     def add_throw(self, throw):
         score = self.states[throw.thrower]
         score.number_of_throws += 1

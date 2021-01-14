@@ -271,6 +271,25 @@ def set_all_throw_details(throw_dic, drink_curve_dic):
 
     return analysis
 
+def set_all_throw_details_and_generate_game(throw_dic, drink_curve_dic):
+    dummy_game = Ordered_Cricket(player_count=2)
+    analysis = []
+
+    #For each throw in the game, set the number of drinks, target value, and nearest coordinate to points
+    for thrower_id in throw_dic:
+        thrower = throw_dic[thrower_id][0].thrower_name
+        if thrower not in drink_curve_dic:
+            print('Failed to find drink data for {}.'.format(thrower))
+            drink_curve_dic[thrower] = [(datetime.now(), 0.0)]
+        for throw in throw_dic[thrower_id]:
+            throw.number_of_drinks = calculate_drinks_at_time(throw.time, drink_curve_dic[thrower])
+            throw.target_value = dummy_game.get_thrower_target(thrower_id)
+            throw.nearest_coord_in_target = calculate_nearest_coord_in_target(throw)
+            throw.miss_distance = calculate_miss_distance(throw)
+            dummy_game.add_throw(throw)
+
+    return dummy_game
+
 def calculate_drinks_at_time(time, drink_curve):
     if time is None or drink_curve is None or drink_curve is []:
         return 0.0
@@ -296,6 +315,12 @@ def calculate_drinks_at_time(time, drink_curve):
     dt = (time-t1).total_seconds()
     aproximation = slope*dt + p1[1]
     return aproximation
+
+def calculate_miss_distance(throw):
+    p1 = Point(throw.nearest_coord_in_target)
+    p2 = Point((throw.cartesian_x, throw.cartesian_y))
+    return p1.distance(p2)
+
 
 def calculate_nearest_coord_in_target(throw):
     target_polygon = get_polygon(throw.target_value)
